@@ -216,7 +216,7 @@
       heartPoints.length = 0;
       heartFill.length = 0;
       const outlineCount = 360; // outline stars
-      const scale = Math.min(canvas.clientWidth, canvas.clientHeight) * 0.045; // slightly smaller
+      const scale = Math.min(canvas.clientWidth, canvas.clientHeight) * 0.038; // smaller heart
       cx = canvas.clientWidth / 2;
       cy = canvas.clientHeight / 2 + 10;
       baseScale = scale;
@@ -244,25 +244,24 @@
         }
       }
       path.closePath();
-
-      // Interior stars via jittered grid sampling for uniform coverage (no holes)
+      // Interior stars via jittered grid sampling for uniform coverage
       const bw = Math.max(1, maxx - minx);
       const bh = Math.max(1, maxy - miny);
       const approxArea = bw * bh * 0.55; // heart ~55% of bbox
-      // Choose grid step based on area; denser fill
-      const step = Math.max(4, Math.min(10, Math.sqrt(approxArea / 3000)));
-      const jitter = step * 0.35;
-      for (let y = miny; y <= maxy; y += step) {
-        for (let x = minx; x <= maxx; x += step) {
-          const sx = x + (Math.random() * 2 - 1) * jitter;
-          const sy = y + (Math.random() * 2 - 1) * jitter;
+      // Reduce density by increasing grid step and clamp higher
+      const step = Math.max(7, Math.min(14, Math.sqrt(approxArea / 1500)));
+      const jitter = step * 0.30;
+      for (let yy = miny; yy <= maxy; yy += step) {
+        for (let xx = minx; xx <= maxx; xx += step) {
+          const sx = xx + (Math.random() * 2 - 1) * jitter;
+          const sy = yy + (Math.random() * 2 - 1) * jitter;
           if (ctx.isPointInPath(path, sx, sy)) {
             heartFill.push({
               x: sx,
               y: sy,
               b: Math.random() * 0.5 + 0.4,
               tw: Math.random() * Math.PI * 2,
-              r: Math.random() * 1.4 + 0.6,
+              r: Math.random() * 1.3 + 0.5,
             });
           }
         }
@@ -324,9 +323,8 @@
       ctx.save();
       ctx.clip(clipPath);
 
-      // Draw interior then outline for crisp edge
+      // Interior twinkling stars
       ctx.globalCompositeOperation = 'lighter';
-      // Interior
       for (const p of heartFill) {
         const dx = p.x - cx;
         const dy = p.y - cy;
@@ -336,15 +334,15 @@
         p.tw += 0.07;
         const tw = 0.6 + Math.sin(p.tw) * 0.4;
         const alpha = 0.5 * p.b + 0.5 * tw;
-        const size = p.r * (0.8 + tw * 0.35);
+        const size = p.r * (0.85 + tw * 0.35);
         ctx.fillStyle = `rgba(255, 120, 200, ${alpha})`;
         ctx.beginPath();
         ctx.arc(x, y, size, 0, Math.PI * 2);
         ctx.fill();
       }
-      ctx.restore(); // end clip
+      ctx.restore();
 
-      // Outline
+      // Outline on top for crisp edge
       ctx.save();
       ctx.globalCompositeOperation = 'lighter';
       for (const p of heartPoints) {
