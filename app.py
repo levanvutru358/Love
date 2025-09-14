@@ -1,7 +1,7 @@
 from flask import Flask, render_template
 
-# Serve CSS/JS from the templates folder at /static
-app = Flask(__name__, static_folder='templates', static_url_path='/static')
+# Serve CSS/JS from the ./static folder at /static
+app = Flask(__name__, static_folder='static', static_url_path='/static')
 
 
 @app.get('/')

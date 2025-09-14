@@ -1,6 +1,7 @@
 (() => {
   const screens = Array.from(document.querySelectorAll('.screen'));
   let current = 0;
+  const getDpr = () => Math.min(2, window.devicePixelRatio || 1); // clamp for mobile perf
 
   function showScreen(index) {
     screens.forEach((s, i) => s.classList.toggle('active', i === index));
@@ -61,7 +62,7 @@
     const stars = [];
 
     function resize() {
-      const dpr = Math.max(1, window.devicePixelRatio || 1);
+      const dpr = getDpr();
       w = canvas.width = Math.floor(canvas.clientWidth * dpr);
       h = canvas.height = Math.floor(canvas.clientHeight * dpr);
       ctx.setTransform(1,0,0,1,0,0);
@@ -202,7 +203,7 @@
     }
 
     function resize() {
-      const dpr = Math.max(1, window.devicePixelRatio || 1);
+      const dpr = getDpr();
       w = canvas.width = Math.floor(canvas.clientWidth * dpr);
       h = canvas.height = Math.floor(canvas.clientHeight * dpr);
       ctx.setTransform(1,0,0,1,0,0);
@@ -427,7 +428,7 @@
     let hearts = [];
 
     function resize() {
-      const dpr = Math.max(1, window.devicePixelRatio || 1);
+      const dpr = getDpr();
       canvas.width = Math.floor(canvas.clientWidth * dpr);
       canvas.height = Math.floor(canvas.clientHeight * dpr);
       ctx.setTransform(1,0,0,1,0,0);

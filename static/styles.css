@@ -20,11 +20,17 @@ body {
   color: var(--text);
   background: radial-gradient(1200px 600px at 50% -20%, #142045 0%, var(--bg) 60%) fixed;
   overflow: hidden;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  user-select: none;
+  overscroll-behavior: none;
 }
 
 #app, .screen {
   width: 100vw;
-  height: 100vh;
+  /* Use dynamic viewport units for mobile address bar */
+  height: 100svh;
+  min-height: 100dvh;
 }
 
 .screen {
@@ -221,7 +227,7 @@ body {
 /* Overlays for animated screens */
 .overlay-title {
   position: absolute;
-  top: 20px;
+  top: calc(20px + env(safe-area-inset-top, 0px));
   left: 50%;
   transform: translateX(-50%);
   font-weight: 700;
@@ -233,7 +239,7 @@ body {
 
 .hint {
   position: absolute;
-  bottom: 16px;
+  bottom: calc(16px + env(safe-area-inset-bottom, 0px));
   left: 50%;
   transform: translateX(-50%);
   color: #cfd6f3;
