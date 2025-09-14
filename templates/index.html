@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Thiệp • Lời chúc • Pháo hoa • Trái tim sao</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}" />
+  </head>
+  <body>
+    <div id="app">
+      <!-- Screen 1: Nhiều trái tim sao đập nhẹ -->
+      <section class="screen active" id="screen-1" data-screen="1">
+        <div class="stars" aria-hidden="true"></div>
+        <canvas id="hearts-1"></canvas>
+        <div class="hint">Nhấp để xem bí mật</div>
+      </section>
+
+      <!-- Screen 2: Lời chúc (tặng cho bồ) -->
+      <section class="screen" id="screen-2" data-screen="2">
+        <div class="message">
+          <h1>Gửi e ✨</h1>
+          <p>
+            Chúc e luôn bình an, rạng rỡ và hạnh phúc. Cảm ơn bồ đã đến và làm những ngày của
+            mình thêm ấm áp. Mong mỗi sớm mai bồ đều mỉm cười, và mỗi tối đều thấy mình được yêu
+            thương. Thương bồ nhiều!
+          </p>
+        </div>
+        <div class="hint"></div>
+      </section>
+
+      <!-- Screen 3: Pháo hoa -->
+      <section class="screen" id="screen-3" data-screen="3">
+        <canvas id="fireworks"></canvas>
+        <div class="overlay-title">Pháo hoa lung linh 🎆</div>
+        <div class="hint"></div>
+      </section>
+
+      <!-- Screen 4: Trái tim sao đập nhẹ -->
+      <section class="screen" id="screen-4" data-screen="4">
+        <canvas id="heart"></canvas>
+        <div class="overlay-title">Trái tim 💖</div>
+        <div class="hint"></div>
+      </section>
+    </div>
+
+    <script src="{{ url_for('static', filename='main.js') }}"></script>
+  </body>
+  </html>
