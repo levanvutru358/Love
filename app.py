@@ -1,7 +1,7 @@
 from flask import Flask, render_template
 
-# Serve static files from project root to avoid moving existing assets
-app = Flask(__name__, static_folder='.', static_url_path='')
+# Serve CSS/JS from the templates folder at /static
+app = Flask(__name__, static_folder='templates', static_url_path='/static')
 
 
 @app.get('/')
@@ -17,4 +17,3 @@ def health():
 if __name__ == '__main__':
     # Runs on http://127.0.0.1:5173
     app.run(debug=True, port=5173)
-
