@@ -215,56 +215,69 @@
     function buildHeart() {
       heartPoints.length = 0;
       heartFill.length = 0;
-      const outlineCount = 360; // outline stars
-      const scale = Math.min(canvas.clientWidth, canvas.clientHeight) * 0.038; // smaller heart
+      
+      const scale = Math.min(canvas.clientWidth, canvas.clientHeight) * 0.04;
       cx = canvas.clientWidth / 2;
       cy = canvas.clientHeight / 2 + 10;
       baseScale = scale;
-
-      // Build outline points and a path for interior sampling
+      
+      // Create heart-shaped outline stars
+      const outlineDensity = 800;
       let minx = Infinity, maxx = -Infinity, miny = Infinity, maxy = -Infinity;
-      const path = new Path2D();
-      for (let i = 0; i <= outlineCount; i++) {
-        const t = (i / outlineCount) * Math.PI * 2;
+      for (let i = 0; i < outlineDensity; i++) {
+        const t = (i / outlineDensity) * Math.PI * 2;
         const xh = 16 * Math.pow(Math.sin(t), 3);
         const yh = 13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t);
         const x = cx + xh * scale;
         const y = cy - yh * scale;
-        if (i === 0) path.moveTo(x, y); else path.lineTo(x, y);
-        minx = Math.min(minx, x); maxx = Math.max(maxx, x);
-        miny = Math.min(miny, y); maxy = Math.max(maxy, y);
-        if (i < outlineCount) {
-          heartPoints.push({
-            x,
-            y,
-            b: Math.random() * 0.5 + 0.5,
-            tw: Math.random() * Math.PI * 2,
-            r: Math.random() * 1.6 + 0.8,
-          });
-        }
+
+        // track bounds for interior sampling
+        if (x < minx) minx = x; if (x > maxx) maxx = x;
+        if (y < miny) miny = y; if (y > maxy) maxy = y;
+        
+        // Add slight randomness for natural look
+        const noise = (Math.random() - 0.5) * 2;
+        const xNoise = x + noise;
+        const yNoise = y + noise;
+        
+        heartPoints.push({
+          x: xNoise,
+          y: yNoise,
+          b: Math.random() * 0.6 + 0.4,
+          tw: Math.random() * Math.PI * 2,
+          r: Math.random() * 1.5 + 0.8,
+        });
       }
-      path.closePath();
-      // Interior stars via jittered grid sampling for uniform coverage
+      // Interior stars - sample points inside path
+      const path = buildHeartPath(scale, cx, cy);
       const bw = Math.max(1, maxx - minx);
       const bh = Math.max(1, maxy - miny);
-      const approxArea = bw * bh * 0.55; // heart ~55% of bbox
-      // Reduce density by increasing grid step and clamp higher
-      const step = Math.max(7, Math.min(14, Math.sqrt(approxArea / 1500)));
-      const jitter = step * 0.30;
-      for (let yy = miny; yy <= maxy; yy += step) {
-        for (let xx = minx; xx <= maxx; xx += step) {
-          const sx = xx + (Math.random() * 2 - 1) * jitter;
-          const sy = yy + (Math.random() * 2 - 1) * jitter;
-          if (ctx.isPointInPath(path, sx, sy)) {
-            heartFill.push({
-              x: sx,
-              y: sy,
-              b: Math.random() * 0.5 + 0.4,
-              tw: Math.random() * Math.PI * 2,
-              r: Math.random() * 1.3 + 0.5,
-            });
-          }
+      // approximate heart area ~55% of bounding box
+      const approxArea = bw * bh * 0.55;
+      const target = Math.max(220, Math.min(1200, Math.floor(approxArea / 130)));
+      let tries = 0;
+      while (heartFill.length < target && tries < target * 12) {
+        const rx = minx + Math.random() * bw;
+        const ry = miny + Math.random() * bh;
+        // Use identity transform for hit-test so DPR scaling doesn't skew results
+        let inside = false;
+        ctx.save();
+        ctx.setTransform(1,0,0,1,0,0);
+        try {
+          inside = ctx.isPointInPath(path, rx, ry);
+        } finally {
+          ctx.restore();
         }
+        if (inside) {
+          heartFill.push({
+            dx: rx - cx,
+            dy: ry - cy,
+            b: Math.random() * 0.5 + 0.4,
+            tw: Math.random() * Math.PI * 2,
+            r: Math.random() * 1.4 + 0.6,
+          });
+        }
+        tries++;
       }
     }
 
@@ -318,33 +331,25 @@
       ctx.fill();
       ctx.restore();
 
-      // Clip interior to scaled heart shape to prevent bleed
-      const clipPath = buildHeartPath(baseScale * beat, cx, cy);
+      // Render heart fill and outline stars with beat effect
       ctx.save();
-      ctx.clip(clipPath);
-
-      // Interior twinkling stars
       ctx.globalCompositeOperation = 'lighter';
-      for (const p of heartFill) {
-        const dx = p.x - cx;
-        const dy = p.y - cy;
-        const x = cx + dx * beat;
-        const y = cy + dy * beat;
 
-        p.tw += 0.07;
+      // Interior stars first for depth
+      for (const p of heartFill) {
+        p.tw += 0.06;
         const tw = 0.6 + Math.sin(p.tw) * 0.4;
-        const alpha = 0.5 * p.b + 0.5 * tw;
-        const size = p.r * (0.85 + tw * 0.35);
+        const alpha = 0.45 * p.b + 0.55 * tw;
+        const size = p.r * (0.8 + tw * 0.35);
+        const x = cx + p.dx * beat;
+        const y = cy + p.dy * beat;
         ctx.fillStyle = `rgba(255, 120, 200, ${alpha})`;
         ctx.beginPath();
         ctx.arc(x, y, size, 0, Math.PI * 2);
         ctx.fill();
       }
-      ctx.restore();
 
-      // Outline on top for crisp edge
-      ctx.save();
-      ctx.globalCompositeOperation = 'lighter';
+      // Render outline stars with heart beat
       for (const p of heartPoints) {
         const dx = p.x - cx;
         const dy = p.y - cy;
@@ -360,6 +365,7 @@
         ctx.arc(x, y, size, 0, Math.PI * 2);
         ctx.fill();
       }
+      
       ctx.restore();
 
       raf = running ? requestAnimationFrame(update) : null;
