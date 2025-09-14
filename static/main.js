@@ -216,7 +216,7 @@
       heartPoints.length = 0;
       heartFill.length = 0;
       
-      const scale = Math.min(canvas.clientWidth, canvas.clientHeight) * 0.04;
+      const scale = Math.min(canvas.clientWidth, canvas.clientHeight) * 0.03;
       cx = canvas.clientWidth / 2;
       cy = canvas.clientHeight / 2 + 10;
       baseScale = scale;
