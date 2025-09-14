@@ -248,8 +248,8 @@
       const bw = Math.max(1, maxx - minx);
       const bh = Math.max(1, maxy - miny);
       const approxArea = bw * bh * 0.55; // heart ~55% of bbox
-      // Choose grid step based on area to keep ~1.1–1.5k points typical
-      const step = Math.max(6, Math.min(14, Math.sqrt(approxArea / 1300)));
+      // Choose grid step based on area; denser fill
+      const step = Math.max(4, Math.min(10, Math.sqrt(approxArea / 3000)));
       const jitter = step * 0.35;
       for (let y = miny; y <= maxy; y += step) {
         for (let x = minx; x <= maxx; x += step) {
@@ -301,8 +301,8 @@
       }
       ctx.restore();
 
-      // Heart: gentle beating scale
-      const beat = 1 + 0.055 * Math.sin(time * 2.0); // slightly smoother
+      // Heart: gentle beating scale (a bit faster)
+      const beat = 1 + 0.055 * Math.sin(time * 2.6);
 
       // Subtle glow behind heart
       const r0 = baseScale * 6 * beat;
